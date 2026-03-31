@@ -11,6 +11,12 @@ jobs:
   compose-e2e:
     runs-on: ubuntu-latest
     steps:
+      # ============= InvisiRisk Setup =============
+      - name: Setup PSE
+        uses: invisirisk/pse-action@latest
+        with:
+          app_token: ${{secrets.IR_API_KEY}}
+      # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -38,3 +44,10 @@ jobs:
       - name: Compose down
         if: always()
         run: docker compose -f docker-compose.e2e.yml down -v
+      # ============= InvisiRisk Cleanup =============
+      - name: Cleanup PSE
+        if: always()
+        uses: invisirisk/pse-action@latest
+        with:
+          cleanup: "true"
+      # ============= InvisiRisk Cleanup End =============
