@@ -22,7 +22,7 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,7 +59,7 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
 
   python-pypi-build:
@@ -75,7 +75,7 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
@@ -96,7 +96,7 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
 
   ruby-build:
@@ -112,7 +112,7 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
@@ -133,7 +133,7 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
 
   go-build:
@@ -149,7 +149,7 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
@@ -170,5 +170,5 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============

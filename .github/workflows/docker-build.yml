@@ -26,7 +26,7 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
           mode: docker-intercept
       # ============= InvisiRisk Setup End =============
       - name: Checkout code
@@ -64,5 +64,5 @@ jobs:
         uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
-          api_url: "https://api.stage.invisirisk.com"
+          api_url: "https://app.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
