@@ -33,7 +33,7 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@develp
+        uses: invisirisk/pse-action@develop
         with:
           app_token: ${{secrets.IR_API_KEY}}
           api_url: "https://app.stage.invisirisk.com"
@@ -85,7 +85,7 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@develp
+        uses: invisirisk/pse-action@develop
         with:
           cleanup: "true"
           api_url: "https://app.stage.invisirisk.com"
@@ -97,7 +97,7 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@develp
+        uses: invisirisk/pse-action@develop
         with:
           app_token: ${{secrets.IR_API_KEY}}
           api_url: "https://app.stage.invisirisk.com"
@@ -126,7 +126,7 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@develp
+        uses: invisirisk/pse-action@develop
         with:
           cleanup: "true"
           api_url: "https://app.stage.invisirisk.com"
@@ -138,7 +138,7 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@develp
+        uses: invisirisk/pse-action@develop
         with:
           app_token: ${{secrets.IR_API_KEY}}
           api_url: "https://app.stage.invisirisk.com"
@@ -161,7 +161,7 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@develp
+        uses: invisirisk/pse-action@develop
         with:
           cleanup: "true"
           api_url: "https://app.stage.invisirisk.com"
@@ -174,7 +174,7 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@develp
+        uses: invisirisk/pse-action@develop
         with:
           app_token: ${{secrets.IR_API_KEY}}
           api_url: "https://app.stage.invisirisk.com"
@@ -205,7 +205,7 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@develp
+        uses: invisirisk/pse-action@develop
         with:
           cleanup: "true"
           api_url: "https://app.stage.invisirisk.com"
