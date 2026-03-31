@@ -1,0 +1,35 @@
+name: Variation Branch Behavior
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: variation-branch-behavior-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-or-manual-build:
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fast validation build
+        run: docker build -f docker/Dockerfile.raw -t sample-docker-build:pr-fast .
+
+  main-extended-build:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extended build
+        run: docker build -f docker/Dockerfile.multistage -t sample-docker-build:main-extended .
+      - name: Smoke
+        uses: ./.github/actions/smoke-test
+        with:
+          image: sample-docker-build:main-extended
+          name: main-extended
+          host-port: "18114"

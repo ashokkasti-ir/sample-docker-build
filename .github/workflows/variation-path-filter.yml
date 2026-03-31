@@ -1,0 +1,49 @@
+name: Variation Path Filter
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - app/**
+      - docker/**
+      - Dockerfile
+      - .github/workflows/**
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            app:
+              - 'app/**'
+            docker:
+              - 'docker/**'
+              - 'Dockerfile'
+
+  build-app-path:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.app == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+        working-directory: app
+      - run: npm --prefix app start & sleep 3
+
+  build-docker-path:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.docker == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f docker/Dockerfile.raw -t sample-docker-build:path-filter .

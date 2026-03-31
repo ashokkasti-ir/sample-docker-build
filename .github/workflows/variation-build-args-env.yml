@@ -1,0 +1,31 @@
+name: Variation Build Args Env
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: variation-build-args-env-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  env-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env_name: [production, staging]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build env-specific image
+        run: |
+          docker build \
+            -f docker/Dockerfile.env-args \
+            --build-arg NODE_ENV=${{ matrix.env_name }} \
+            -t sample-docker-build:env-${{ matrix.env_name }} \
+            .
+
+      - name: Assert NODE_ENV in container
+        run: |
+          docker run --rm sample-docker-build:env-${{ matrix.env_name }} node -e "if (process.env.NODE_ENV !== '${{ matrix.env_name }}') { process.exit(1) }"

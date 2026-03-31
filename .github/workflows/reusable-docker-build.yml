@@ -1,0 +1,42 @@
+name: Reusable Docker Build
+
+on:
+  workflow_call:
+    inputs:
+      variant_id:
+        required: true
+        type: string
+      dockerfile:
+        required: true
+        type: string
+      context:
+        required: true
+        type: string
+      image_tag:
+        required: true
+        type: string
+      smoke_port:
+        required: false
+        type: string
+        default: "18110"
+
+jobs:
+  build-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: |
+          docker build \
+            -f "${{ inputs.dockerfile }}" \
+            -t "sample-docker-build:${{ inputs.image_tag }}" \
+            "${{ inputs.context }}"
+
+      - name: Smoke
+        uses: ./.github/actions/smoke-test
+        with:
+          image: sample-docker-build:${{ inputs.image_tag }}
+          name: reusable-${{ inputs.variant_id }}
+          host-port: ${{ inputs.smoke_port }}

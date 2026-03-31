@@ -1,0 +1,30 @@
+name: container-smoke-test
+description: Run a container and validate health endpoint
+inputs:
+  image:
+    description: Docker image tag to run
+    required: true
+  name:
+    description: Container name
+    required: true
+  host-port:
+    description: Host port mapped to 3000
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -e
+        docker run -d --rm --name "${{ inputs.name }}" -p "${{ inputs.host-port }}:3000" "${{ inputs.image }}"
+        for i in 1 2 3 4 5 6 7 8 9 10; do
+          if curl -fsS "http://127.0.0.1:${{ inputs.host-port }}/health"; then
+            break
+          fi
+          sleep 2
+        done
+        curl -fsS "http://127.0.0.1:${{ inputs.host-port }}/health"
+        docker logs "${{ inputs.name }}"
+    - if: always()
+      shell: bash
+      run: docker rm -f "${{ inputs.name }}" >/dev/null 2>&1 || true

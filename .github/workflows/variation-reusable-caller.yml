@@ -1,0 +1,30 @@
+name: Variation Reusable Caller
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: reusable variant id (use all for all)
+        required: false
+        default: all
+
+jobs:
+  reusable-raw:
+    if: ${{ inputs.variant == 'all' || inputs.variant == 'reusable-raw' }}
+    uses: ./.github/workflows/reusable-docker-build.yml
+    with:
+      variant_id: reusable-raw
+      dockerfile: docker/Dockerfile.raw
+      context: .
+      image_tag: reusable-raw
+      smoke_port: "18111"
+
+  reusable-debian:
+    if: ${{ inputs.variant == 'all' || inputs.variant == 'reusable-debian' }}
+    uses: ./.github/workflows/reusable-docker-build.yml
+    with:
+      variant_id: reusable-debian
+      dockerfile: docker/Dockerfile.debian
+      context: .
+      image_tag: reusable-debian
+      smoke_port: "18112"
