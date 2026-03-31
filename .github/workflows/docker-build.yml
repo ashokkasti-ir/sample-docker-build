@@ -7,6 +7,14 @@ on:
         description: 'Docker image tag'
         required: false
         default: 'latest'
+      dockerfile:
+        description: 'Dockerfile path'
+        required: false
+        default: 'Dockerfile'
+      context:
+        description: 'Build context path'
+        required: false
+        default: '.'
 
 jobs:
   build:
@@ -17,4 +25,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t sample-docker-build:${{ github.event.inputs.image_tag }} .
+        run: |
+          docker build \
+            -f "${{ github.event.inputs.dockerfile }}" \
+            -t sample-docker-build:${{ github.event.inputs.image_tag }} \
+            "${{ github.event.inputs.context }}"
+
+      - name: Smoke test
+        run: |
+          set -e
+          docker run -d --rm --name sample-baseline -p 18085:3000 sample-docker-build:${{ github.event.inputs.image_tag }}
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS http://127.0.0.1:18085/health; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:18085/health
+          docker logs sample-baseline
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f sample-baseline >/dev/null 2>&1 || true

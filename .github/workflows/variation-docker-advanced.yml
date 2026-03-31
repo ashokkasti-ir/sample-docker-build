@@ -1,0 +1,139 @@
+name: Variation Docker Advanced
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Advanced variant id to run (use all for full run)"
+        required: false
+        default: "all"
+
+jobs:
+  advanced-docker-variants:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: multistage-runtime
+            dockerfile: docker/Dockerfile.multistage
+            target: runtime
+          - id: distroless-runtime
+            dockerfile: docker/Dockerfile.distroless
+            target: ""
+          - id: nonroot-runtime
+            dockerfile: docker/Dockerfile.nonroot
+            target: ""
+          - id: debian-runtime
+            dockerfile: docker/Dockerfile.debian
+            target: ""
+          - id: alpine-runtime
+            dockerfile: docker/Dockerfile.alpine
+            target: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        if: ${{ inputs.variant == 'all' || inputs.variant == matrix.id }}
+        run: |
+          if [ -n "${{ matrix.target }}" ]; then
+            docker build \
+              --target "${{ matrix.target }}" \
+              -f "${{ matrix.dockerfile }}" \
+              -t "sample-docker-build:${{ matrix.id }}" \
+              .
+          else
+            docker build \
+              -f "${{ matrix.dockerfile }}" \
+              -t "sample-docker-build:${{ matrix.id }}" \
+              .
+          fi
+
+      - name: Smoke test
+        if: ${{ inputs.variant == 'all' || inputs.variant == matrix.id }}
+        run: |
+          set -e
+          docker run -d --rm --name sample-${{ matrix.id }} -p 18082:3000 sample-docker-build:${{ matrix.id }}
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS http://127.0.0.1:18082/health; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:18082/health
+          docker logs sample-${{ matrix.id }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f sample-${{ matrix.id }} >/dev/null 2>&1 || true
+
+  multi-platform-metadata:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.variant == 'all' || inputs.variant == 'multi-platform-metadata' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build multi-platform OCI archive
+        run: |
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --file docker/Dockerfile.multistage \
+            --target runtime \
+            --output type=oci,dest=/tmp/sample-multi-platform.oci \
+            .
+
+  image-artifact-roundtrip:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.variant == 'all' || inputs.variant == 'image-artifact-roundtrip' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image for artifact
+        run: docker build -f docker/Dockerfile.raw -t sample-docker-build:artifact .
+
+      - name: Save tarball
+        run: docker save sample-docker-build:artifact -o /tmp/sample-docker-build.tar
+
+      - name: Upload image tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-tar
+          path: /tmp/sample-docker-build.tar
+
+  image-artifact-verify:
+    runs-on: ubuntu-latest
+    needs: image-artifact-roundtrip
+    if: ${{ inputs.variant == 'all' || inputs.variant == 'image-artifact-roundtrip' }}
+    steps:
+      - name: Download image tar
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-tar
+          path: /tmp
+
+      - name: Load and smoke test
+        run: |
+          docker load -i /tmp/sample-docker-build.tar
+          docker run -d --rm --name artifact-check -p 18083:3000 sample-docker-build:artifact
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS http://127.0.0.1:18083/health; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:18083/health
+          docker logs artifact-check
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f artifact-check >/dev/null 2>&1 || true

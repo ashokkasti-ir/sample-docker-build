@@ -1,0 +1,184 @@
+name: Variation Core
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Variant id to run (use all for full run)"
+        required: false
+        default: "all"
+
+concurrency:
+  group: variation-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-cli-variants:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: raw-cli
+            dockerfile: docker/Dockerfile.raw
+            context: .
+            buildkit: "1"
+            smoke: true
+          - id: cd-pattern
+            dockerfile: docker/Dockerfile.cd-pattern
+            context: .
+            buildkit: "1"
+            smoke: true
+          - id: chained
+            dockerfile: docker/Dockerfile.chained
+            context: .
+            buildkit: "1"
+            smoke: true
+          - id: split
+            dockerfile: docker/Dockerfile.split
+            context: .
+            buildkit: "1"
+            smoke: true
+          - id: app-context
+            dockerfile: docker/Dockerfile.app-context
+            context: app
+            buildkit: "1"
+            smoke: true
+          - id: debian-cli
+            dockerfile: docker/Dockerfile.debian
+            context: .
+            buildkit: "1"
+            smoke: true
+          - id: alpine-cli
+            dockerfile: docker/Dockerfile.alpine
+            context: .
+            buildkit: "1"
+            smoke: true
+          - id: nonroot-cli
+            dockerfile: docker/Dockerfile.nonroot
+            context: .
+            buildkit: "1"
+            smoke: true
+          - id: custom-frontend-cli
+            dockerfile: docker/Dockerfile.custom-frontend
+            context: .
+            buildkit: "1"
+            smoke: true
+          - id: buildkit-disabled
+            dockerfile: docker/Dockerfile.raw
+            context: .
+            buildkit: "0"
+            smoke: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build via docker CLI
+        if: ${{ inputs.variant == 'all' || inputs.variant == matrix.id }}
+        env:
+          DOCKER_BUILDKIT: ${{ matrix.buildkit }}
+        run: |
+          docker build \
+            -f "${{ matrix.dockerfile }}" \
+            -t "sample-docker-build:${{ matrix.id }}" \
+            "${{ matrix.context }}"
+
+      - name: Smoke test container
+        if: ${{ (inputs.variant == 'all' || inputs.variant == matrix.id) && matrix.smoke }}
+        run: |
+          set -e
+          docker run -d --rm --name sample-${{ matrix.id }} -p 18080:3000 sample-docker-build:${{ matrix.id }}
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS http://127.0.0.1:18080/health; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:18080/health
+          docker logs sample-${{ matrix.id }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f sample-${{ matrix.id }} >/dev/null 2>&1 || true
+
+  docker-build-action-variants:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: action-basic
+            dockerfile: docker/Dockerfile.build-action
+            context: .
+            target: ""
+            smoke: true
+          - id: action-custom-frontend
+            dockerfile: docker/Dockerfile.custom-frontend
+            context: .
+            target: ""
+            smoke: true
+          - id: action-multistage-runtime
+            dockerfile: docker/Dockerfile.multistage
+            context: .
+            target: runtime
+            smoke: true
+          - id: action-target-build
+            dockerfile: docker/Dockerfile.multistage
+            context: .
+            target: build
+            smoke: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build via docker/build-push-action (default target)
+        if: ${{ (inputs.variant == 'all' || inputs.variant == matrix.id) && matrix.target == '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          load: true
+          tags: sample-docker-build:${{ matrix.id }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=min
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+
+      - name: Build via docker/build-push-action (explicit target)
+        if: ${{ (inputs.variant == 'all' || inputs.variant == matrix.id) && matrix.target != '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          load: true
+          tags: sample-docker-build:${{ matrix.id }}
+          target: ${{ matrix.target }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=min
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+
+      - name: Smoke test container
+        if: ${{ (inputs.variant == 'all' || inputs.variant == matrix.id) && matrix.smoke }}
+        run: |
+          set -e
+          docker run -d --rm --name sample-${{ matrix.id }} -p 18081:3000 sample-docker-build:${{ matrix.id }}
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS http://127.0.0.1:18081/health; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:18081/health
+          docker logs sample-${{ matrix.id }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f sample-${{ matrix.id }} >/dev/null 2>&1 || true
