@@ -19,9 +19,10 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,9 +56,10 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
 
   python-pypi-build:
@@ -70,9 +72,10 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,9 +93,10 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
 
   ruby-build:
@@ -105,9 +109,10 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
@@ -125,9 +130,10 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
 
   go-build:
@@ -140,9 +146,10 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Setup End =============
       - name: Checkout
         uses: actions/checkout@v4
@@ -160,7 +167,8 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============

@@ -72,9 +72,10 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
+          api_url: "https://api.stage.invisirisk.com"
           mode: docker-intercept
       # ============= InvisiRisk Setup End =============
       - name: Checkout
@@ -88,7 +89,7 @@ jobs:
           docker build \
             -f "${{ matrix.dockerfile }}" \
             -t "sample-docker-build:${{ matrix.id }}" \
-            --build-arg BUILDKIT_SYNTAX=public.ecr.aws/w3c0c0n7/invisirisk/baf-buildkit:latest \
+            --build-arg BUILDKIT_SYNTAX=public.ecr.aws/w3c0c0n7/invisirisk/baf-buildkit:dev-test \
             --secret id=pse-ca,src=/etc/ssl/certs/pse.pem \
             --build-arg PSE_PROXY=http://${PSE_PROXY_IP}:3128 \
             "${{ matrix.context }}"
@@ -114,9 +115,10 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
 
   docker-build-action-variants:
@@ -148,9 +150,10 @@ jobs:
     steps:
       # ============= InvisiRisk Setup =============
       - name: Setup PSE
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           app_token: ${{secrets.IR_API_KEY}}
+          api_url: "https://api.stage.invisirisk.com"
           mode: docker-intercept
       # ============= InvisiRisk Setup End =============
       - name: Checkout
@@ -209,7 +212,8 @@ jobs:
       # ============= InvisiRisk Cleanup =============
       - name: Cleanup PSE
         if: always()
-        uses: invisirisk/pse-action@latest
+        uses: invisirisk/pse-action@dev-test
         with:
           cleanup: "true"
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============

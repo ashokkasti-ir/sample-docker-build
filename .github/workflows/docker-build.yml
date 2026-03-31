@@ -25,8 +25,8 @@ jobs:
       - name: Setup PSE
         uses: invisirisk/pse-action@dev-test
         with:
-          api_url: "https://api.dev.invisirisk.com"
           app_token: ${{secrets.IR_API_KEY}}
+          api_url: "https://api.stage.invisirisk.com"
           mode: docker-intercept
       # ============= InvisiRisk Setup End =============
       - name: Checkout code
@@ -37,7 +37,7 @@ jobs:
           docker build \
             -f "${{ github.event.inputs.dockerfile }}" \
             -t sample-docker-build:${{ github.event.inputs.image_tag }} \
-            --build-arg BUILDKIT_SYNTAX=public.ecr.aws/w3c0c0n7/invisirisk/baf-buildkit:latest \
+            --build-arg BUILDKIT_SYNTAX=public.ecr.aws/w3c0c0n7/invisirisk/baf-buildkit:dev-test \
             --secret id=pse-ca,src=/etc/ssl/certs/pse.pem \
             --build-arg PSE_PROXY=http://${PSE_PROXY_IP}:3128 \
             "${{ github.event.inputs.context }}"
@@ -63,6 +63,6 @@ jobs:
         if: always()
         uses: invisirisk/pse-action@dev-test
         with:
-          api_url: "https://api.dev.invisirisk.com"
           cleanup: "true"
+          api_url: "https://api.stage.invisirisk.com"
       # ============= InvisiRisk Cleanup End =============
